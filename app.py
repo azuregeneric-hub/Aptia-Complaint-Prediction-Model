@@ -25,7 +25,7 @@ st.markdown("""
     /* Header with Aptia blue */
     .header {
         background-color: #153647;
-        padding: 20px;
+        padding: 10px 20px; /* Reduced vertical padding for shorter height */
         border-radius: 0 0 15px 15px;
         margin-bottom: 10px;
         color: white;
@@ -34,6 +34,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 100%; /* Ensure it spans the column width */
     }
     
     /* Main title in header */
@@ -207,14 +208,43 @@ try:
 except:
     aptia_logo = None
 
-# Header with title only
-st.markdown("""
-    <div class="header">
-        <h1 class="header-title">Complaint Prediction Tool</h1>
-    </div>
-""", unsafe_allow_html=True)
+# Sidebar with simplified information
+with st.sidebar:
+    # Add Aptia logo with proper alignment
+    if aptia_logo:
+        st.image(aptia_logo, use_container_width=True)
+    else:
+        st.markdown("""
+            <div class="logo-container">
+                <h3 style="color: #153647; margin: 0; text-align: center;">Aptia</h3>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    # Create a card-like container using native Streamlit elements
+    st.markdown("### ℹ️ About This Tool")
+    st.write("This tool uses machine learning to predict which customer inquiries are likely to escalate into formal complaints.")
+    
+    st.markdown("#### How to Use")
+    st.write("• Upload your customer inquiry data file")
+    st.write("• The system will analyze it automatically")
+    st.write("• See which cases might become complaints")
+    st.write("• Download the results for your team")
+    
+    st.markdown("#### File Types")
+    st.write("• Excel files (.xlsx, .xls)")
+    st.write("• CSV files (.csv)")
 
 # Main content
+# Use columns to create an offset for the header to align with the sidebar
+col_spacer, col_header, col_spacer_right = st.columns([1, 6, 1]) # Adjust ratios as needed
+
+with col_header:
+    st.markdown("""
+        <div class="header">
+            <h1 class="header-title">Complaint Prediction Tool</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
 st.markdown('<p class="subtitle-text">Identify which customer inquiries are likely to escalate into formal complaints</p>', unsafe_allow_html=True)
     
 st.markdown("### 📤 Upload Customer Inquiry Data")
@@ -436,29 +466,3 @@ if uploaded_file is not None:
             st.info("No cases predicted to turn into complaints. Great job!")
         
         st.markdown('</div>', unsafe_allow_html=True)
-
-# Sidebar with simplified information
-with st.sidebar:
-    # Add Aptia logo with proper alignment
-    if aptia_logo:
-        st.image(aptia_logo, use_container_width=True)
-    else:
-        st.markdown("""
-            <div class="logo-container">
-                <h3 style="color: #153647; margin: 0; text-align: center;">Aptia</h3>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    # Create a card-like container using native Streamlit elements
-    st.markdown("### ℹ️ About This Tool")
-    st.write("This tool uses machine learning to predict which customer inquiries are likely to escalate into formal complaints.")
-    
-    st.markdown("#### How to Use")
-    st.write("• Upload your customer inquiry data file")
-    st.write("• The system will analyze it automatically")
-    st.write("• See which cases might become complaints")
-    st.write("• Download the results for your team")
-    
-    st.markdown("#### File Types")
-    st.write("• Excel files (.xlsx, .xls)")
-    st.write("• CSV files (.csv)")
