@@ -67,20 +67,9 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Card styling for sections - now with a border-like gradient effect */
-    .card-container {
-        padding: 4px;
-        background: linear-gradient(135deg, #16d49b, #153647);
-        border-radius: 16px;
-        margin-bottom: 25px;
-        box-shadow: 0 6px 20px rgba(21, 54, 71, 0.15);
-    }
-    
-    .card {
-        background-color: white;
-        padding: 25px;
-        border-radius: 12px;
-    }
+    /* Removed card styling */
+    /* .card-container {}
+    .card {} */
 
     /* File uploader styling */
     .stFileUploader > div > div {
@@ -122,56 +111,42 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(21, 54, 71, 0.4);
     }
     
-    /* Dataframe styling */
-    .stDataFrame {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(21, 54, 71, 0.1);
-    }
-
-    /* Dataframe header styling */
-    .stDataFrame thead tr {
-        background-color: #153647;
-    }
-    
-    .stDataFrame thead th {
-        color: white;
-        font-weight: 500;
-    }
-    
-    .stDataFrame th {
-        background-color: #153647;
-    }
-
-    .stDataFrame th > div {
-        color: white;
-    }
-    
-    /* Metric boxes */
+    /* Metric boxes - Now without a background color */
     .metric-card {
-        background: linear-gradient(135deg, #153647 0%, #0f2a38 100%);
-        color: white;
-        padding: 25px;
+        background: none;
+        border: 2px solid #153647;
+        color: #153647;
+        padding: 10px;
         border-radius: 12px;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(21, 54, 71, 0.3);
+        box-shadow: 0 2px 8px rgba(21, 54, 71, 0.1);
     }
     
     .metric-title {
         font-size: 16px;
         font-weight: 400;
-        margin-bottom: 8px;
-        opacity: 0.8;
+        margin-bottom: 5px;
+        opacity: 0.9;
     }
     
     .metric-value {
-        font-size: 32px;
+        font-size: 24px;
         font-weight: 700;
     }
-    
+
+    /* Custom CSS for the green line and space management */
+    .green-line {
+        border-top: 2px solid #16d49b;
+        margin-top: 15px;
+        margin-bottom: 15px; /* Restored bottom margin for spacing */
+    }
+
+    /* Removed custom spacing classes to let Streamlit handle it */
+    /* .st-emotion-cache-16txte7, .st-emotion-cache-1pxx0n6, .st-emotion-cache-j9l6j4 {} */
+
     /* Sidebar styling */
     .sidebar .sidebar-content {
-        background: #f8f9fa; /* Lighter shade */
+        background: #f8f9fa;
         border-right: 1px solid #e0e0e0;
     }
     
@@ -333,14 +308,13 @@ if uploaded_file is not None:
         user_df = None
 
     if user_df is not None:
-        st.success(f"✅ Successfully uploaded {uploaded_file.name} ({uploaded_file.size/1024:.1f} KB)")
+        st.markdown('<div class="green-line"></div>', unsafe_allow_html=True)
     
-        with st.container():
-            st.markdown('<div class="card-container"><div class="card">', unsafe_allow_html=True)
-            st.markdown("### 📋 Data Preview")
-            st.dataframe(user_df.head(), use_container_width=True)
-            st.markdown('</div></div>', unsafe_allow_html=True)
-    
+        # Removed the card containers around this section
+        st.markdown("### 📋 Data Preview")
+        st.dataframe(user_df.head(), use_container_width=True)
+        # Removed the closing card div tags
+
         with st.spinner("Loading prediction models and historical data..."):
             models = load_models()
             lookup_nino, lookup_procgroup = load_lookup_tables()
@@ -381,41 +355,39 @@ if uploaded_file is not None:
                 df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
     
-            with st.container():
-                st.markdown('<div class="card-container"><div class="card">', unsafe_allow_html=True)
-                
-                st.markdown("### 📊 Prediction Summary")
-                
-                total_cases = len(df_merged)
-                complaint_cases = sum(df_merged['Predicted_Complaint'] == 1)
-                complaint_percentage = (complaint_cases / total_cases * 100) if total_cases > 0 else 0
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-title">Total Inquiries</div>
-                            <div class="metric-value">{total_cases}</div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                with col2:
-                    st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-title">High-Risk Cases</div>
-                            <div class="metric-value">{complaint_cases}</div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                with col3:
-                    st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-title">Potential Complaint Rate</div>
-                            <div class="metric-value">{complaint_percentage:.1f}%</div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                
-                st.markdown("### 🎯 High-Risk Cases Predicted")
-                
-                if complaint_cases > 0:
+            # Removed the card containers around this section
+            st.markdown("### 📊 Prediction Summary")
+            
+            total_cases = len(df_merged)
+            complaint_cases = sum(df_merged['Predicted_Complaint'] == 1)
+            complaint_percentage = (complaint_cases / total_cases * 100) if total_cases > 0 else 0
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-title">Total Inquiries</div>
+                        <div class="metric-value">{total_cases}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with col2:
+                st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-title">High-Risk Cases</div>
+                        <div class="metric-value">{complaint_cases}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with col3:
+                st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-title">Potential Complaint Rate</div>
+                        <div class="metric-value">{complaint_percentage:.1f}%</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("### 🎯 High-Risk Cases Predicted")
+            
+            if complaint_cases > 0:
                     high_risk_cases = df_merged[df_merged['Predicted_Complaint'] == 1].sort_values('Complaint_Probability', ascending=False)
                     
                     display_columns = ['Case ID', 'Unique Identifier (NINO Encrypted)', 'Title', 
@@ -431,7 +403,7 @@ if uploaded_file is not None:
                         file_name='predicted_complaints.csv', 
                         mime='text/csv'
                     )
-                else:
+            else:
                     st.info("No cases were predicted to turn into complaints. Great job!")
                 
-                st.markdown('</div></div>', unsafe_allow_html=True)
+            st.markdown('</div></div>', unsafe_allow_html=True)
