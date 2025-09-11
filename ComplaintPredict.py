@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 from PIL import Image
 import os
 
-# --- Custom CSS for the main UI (unchanged) ---
+# Set page configuration
 st.set_page_config(
     page_title="Complaint Prediction Tool",
     page_icon="⚠️",
@@ -13,6 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Custom CSS for a more professional and beautiful UI
 st.markdown("""
     <style>
     /* Import a professional font from Google Fonts */
@@ -27,11 +28,12 @@ st.markdown("""
     /* Header with a subtle gradient */
     .header {
         background: linear-gradient(90deg, #153647 0%, #1a4d64 100%);
+        /* Changed padding to move the header up */
         padding: 5px 20px;
         border-radius: 0 0 15px 15px;
         margin-bottom: 20px;
         color: white;
-        box-shadow: 0 0px 15px rgba(21, 54, 71, 0.4);
+        box-shadow: 0 6px 15px rgba(21, 54, 71, 0.4);
         text-align: center;
         display: flex;
         align-items: center;
@@ -47,15 +49,14 @@ st.markdown("""
         letter-spacing: 1px;
     }
     
-    /* Subtitle styling with subtle shadow */
+    /* Subtitle styling */
     .subtitle-text {
         text-align: center;
         color: #16d49b;
-        font-size: 22px;
+        font-size: 20px;
         margin-top: 15px;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
         font-weight: 500;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
     
     /* Section headers with a more refined look */
@@ -67,19 +68,15 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* File uploader styling with more pronounced shadow */
+    /* File uploader styling */
     .stFileUploader > div > div {
         background-color: rgba(255, 255, 255, 0.95);
         padding: 25px;
         border-radius: 15px;
         border: 2px dashed #16d49b;
-        box-shadow: 0 4px 15px rgba(22, 212, 155, 0.2);
-        transition: box-shadow 0.3s ease-in-out;
+        box-shadow: inset 0 0 10px rgba(22, 212, 155, 0.1);
     }
-    .stFileUploader > div > div:hover {
-        box-shadow: 0 6px 20px rgba(22, 212, 155, 0.3);
-    }
-
+    
     /* Button styling - Aptia teal */
     .stButton > button {
         background-color: #16d49b;
@@ -111,7 +108,7 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(21, 54, 71, 0.4);
     }
     
-    /* Metric boxes - with subtle shadow */
+    /* Metric boxes - Now without a background color */
     .metric-card {
         background: none;
         border: 2px solid #153647;
@@ -119,7 +116,7 @@ st.markdown("""
         padding: 10px;
         border-radius: 12px;
         text-align: center;
-        box-shadow: 0 4px 10px rgba(21, 54, 71, 0.15);
+        box-shadow: 0 2px 8px rgba(21, 54, 71, 0.1);
     }
     
     .metric-title {
@@ -141,32 +138,10 @@ st.markdown("""
         margin-bottom: 15px;
     }
     
-    /* NEW: Professional styling for Streamlit DataFrames */
-    .stDataFrame table {
-        border-collapse: collapse;
-        width: 100%;
-        font-size: 14px;
-    }
-
-    /* This CSS now applies to the pandas.Styler object */
-    .stDataFrame th {
-        background-color: #153647 !important;
-        color: white !important;
-        padding: 12px;
-        text-align: left;
-        border: 1px solid #e0e0e0;
-        font-weight: 500;
-    }
-    
-    .stDataFrame td {
-        padding: 10px;
-        border: 1px solid #e0e0e0;
-    }
-    .stDataFrame table tr:nth-child(even) {
-        background-color: #f7f9fc;
-    }
-    .stDataFrame table tr:hover {
-        background-color: #e6f0ff;
+    /* Style for DataFrame headers */
+    .stDataFrame table th {
+        background-color: #153647;
+        color: white;
     }
 
     /* Sidebar styling */
@@ -240,6 +215,8 @@ uploaded_file = st.file_uploader(
     label_visibility="collapsed"
 )
 
+# ... [rest of the code remains the same] ...
+
 # Load pre-trained models
 @st.cache_resource
 def load_models():
@@ -255,7 +232,6 @@ def load_lookup_tables():
     try:
         lookup_nino = pd.read_csv("nino_lookup_features.csv")
         lookup_procgroup = pd.read_csv("nino_procgroup_lookup_features.csv")
-        #lookup_nino_monthly=pd.read_csv("nino_monthly_lookup_features.csv")
 
         # Clean keys for consistency
         lookup_nino['Unique Identifier (NINO Encrypted)'] = (
@@ -267,13 +243,10 @@ def load_lookup_tables():
         lookup_procgroup['Process Group'] = (
             lookup_procgroup['Process Group'].astype(str).str.strip()
         )
-        # lookup_nino_monthly['Unique Identifier (NINO Encrypted)'] = (
-        #     lookup_nino_monthly['Unique Identifier (NINO Encrypted)'].astype(str).str.strip().str.upper()
-        # )
-        return lookup_nino, lookup_procgroup  # , lookup_nino_monthly
+        return lookup_nino, lookup_procgroup
     except FileNotFoundError:
-        st.error("Historical data files not found. Please ensure `nino_lookup_features.csv` and `nino_procgroup_lookup_features.csv` and `nino_monthly_lookup_features.csv` are in the same directory.")
-        return None, None 
+        st.error("Historical data files not found. Please ensure `nino_lookup_features.csv` and `nino_procgroup_lookup_features.csv` are in the same directory.")
+        return None, None
 
 # Cleaning NINO
 def clean_nino_column(df):
@@ -359,80 +332,29 @@ if uploaded_file is not None:
                     df_merged['will_file_complaint_in_future'] = 0
 
                 columns_to_drop = [
-    'Case ID',
-    'Unique Identifier (NINO Encrypted)',
-    'ClientName',
-    'OneCode',
-    'Current Activity User',
-    'Report_Date',
-    'Start Date',
-    'Create Date',
-    'Mercer Consented',
-    'Pend Case',
-    #'Scan+2',
-    'Source',
-    'Pend Case',
-    'Operational Location',
-    'Case Indicator',
-    'Flag_Scheme',
-    #'Portfolio',
-    'Team Name'
-    #'Location',
-    'Process Name',
-    'Process Group',
-    'Critical',
-    #'Onshore/Offshore',
-    'Current Outsourcing Team',
-    'Event Type',
-    #'Site',
-    'Completes',
-    'Consented/Non consented',
-    'Scheme'
+                    'Case ID', 'Unique Identifier (NINO Encrypted)', 'ClientName', 'OneCode',
+                    'Current Activity User', 'Report_Date', 'Start Date', 'Create Date', 'Mercer Consented',
+                    'Pend Case', 'Source', 'Pend Case', 'Operational Location', 'Case Indicator',
+                    'Flag_Scheme', 'Team Name', 'Process Name', 'Critical', 'Current Outsourcing Team',
+                    'Event Type', 'Completes', 'Consented/Non consented', 'Scheme'
+                ]
 
-]
+                X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
 
-            # Prepare features as you do
-            X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
+                for f in train_features_order:
+                    if f not in X_user.columns:
+                        X_user[f] = 0
 
-            # Ensure all features present and ordered correctly
-            for f in train_features_order:
-                  if f not in X_user.columns:
-                     X_user[f] = 0
-            X_user = X_user[train_features_order]
-            model = models['model_jan_feb_mar_apr']
+                X_user = X_user[train_features_order]
 
+                model = models['model_jan_feb_mar_apr']
 
-# Prediction# Debug print to compare feature names
-            print("Model expects features:", model.get_booster().feature_names)
-            print("X_user columns prior predict:", list(X_user.columns))
+                #df_merged['Predicted_Complaint'] = model.predict(X_user)
+                #df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
 
-            # Clean whitespace from both lists
-            model_features = [f.strip() for f in model.get_booster().feature_names]
-            X_user_cols = [c.strip() for c in X_user.columns]
-            # Reassign columns with stripped names
-            X_user.columns = X_user_cols
-
-
-
-
-# Optional: force update model feature names if mismatch persists and data aligns
-            model.get_booster().feature_names = X_user_cols
-            print("Model features cleaned:", model_features)
-            print("X_user columns cleaned:", X_user_cols)
-            print("Exact match:", model_features == X_user_cols)
-            df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
-
-
-
-
-
-# Then proceed to predict
-
-
-            
-            df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
-            df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
-
+                df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+                df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
+    
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)
@@ -471,12 +393,7 @@ if uploaded_file is not None:
                                    'Process Group', 'Complaint_Probability']
                 available_columns = [col for col in display_columns if col in high_risk_cases.columns]
                 
-                # Apply styling to the DataFrame before displaying it
-                styled_df = high_risk_cases[available_columns].style.set_table_styles([
-                    {'selector': 'th', 'props': [('background-color', '#153647'), ('color', 'white')]}
-                ])
-                
-                st.dataframe(styled_df, use_container_width=True)
+                st.dataframe(high_risk_cases[available_columns], use_container_width=True)
                 
                 csv_data = high_risk_cases.to_csv(index=False)
                 st.download_button(
