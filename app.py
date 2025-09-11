@@ -351,6 +351,8 @@ if uploaded_file is not None:
 
                 df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+
+
     
             st.markdown("### 📊 Prediction Summary")
             

@@ -331,14 +331,38 @@ if uploaded_file is not None:
                 if 'will_file_complaint_in_future' not in df_merged.columns:
                     df_merged['will_file_complaint_in_future'] = 0
 
-                columns_to_drop = [
-                    'Case ID', 'Unique Identifier (NINO Encrypted)', 'ClientName', 'OneCode',
-                    'Current Activity User', 'Report_Date', 'Start Date', 'Create Date', 'Mercer Consented',
-                    'Pend Case', 'Source', 'Pend Case', 'Operational Location', 'Case Indicator',
-                    'Flag_Scheme', 'Team Name', 'Process Name', 'Critical', 'Current Outsourcing Team',
-                    'Event Type', 'Completes', 'Consented/Non consented', 'Scheme'
-                ]
+                columns_to_drop = columns_to_drop = [
+    'Case ID',
+    'Unique Identifier (NINO Encrypted)',
+    'ClientName',
+    'OneCode',
+    'Current Activity User',
+    'Report_Date',
+    'Start Date',
+    'Create Date',
+    'Mercer Consented',
+    'Pend Case',
+    #'Scan+2',
+    'Source',
+    'Pend Case',
+    'Operational Location',
+    'Case Indicator',
+    'Flag_Scheme',
+    #'Portfolio',
+    'Team Name'
+    #'Location',
+    'Process Name',
+    'Process Group',
+    'Critical',
+    #'Onshore/Offshore',
+    'Current Outsourcing Team',
+    'Event Type',
+    #'Site',
+    'Completes',
+    'Consented/Non consented',
+    'Scheme'
 
+]
                 X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
 
                 for f in train_features_order:
@@ -354,6 +378,10 @@ if uploaded_file is not None:
 
                 df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+                print(model.get_booster().feature_names)
+                print(f"Number of features trained on: {len(model.get_booster().feature_names)}")
+                print("Are columns unique?", len(X_user.columns) == len(set(X_user.columns)))
+                X_user = X_user.apply(pd.to_numeric, errors='coerce').fillna(0)
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)
