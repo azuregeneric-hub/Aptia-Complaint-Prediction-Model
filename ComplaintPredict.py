@@ -289,7 +289,7 @@ def preprocess_data_and_drop(df, drop_columns, target_column=None):
 
 # Expected feature order during training
 train_features_order = [
-    'Title', 'Portfolio', 'Location', 'Team Name', 'Process Name', 'Process Group',
+    'Title', 'Portfolio', 'Location', 'Team Name', 'Process Name',
     'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event',
     'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'year_month','nino_monthly_frequency',
     'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries'
