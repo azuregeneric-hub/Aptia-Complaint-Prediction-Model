@@ -352,9 +352,8 @@ if uploaded_file is not None:
                 #df_merged['Predicted_Complaint'] = model.predict(X_user)
                 #df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
 
+                df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
-                df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
-    
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)
