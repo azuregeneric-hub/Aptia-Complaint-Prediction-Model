@@ -288,12 +288,7 @@ def preprocess_data_and_drop(df, drop_columns, target_column=None):
     return X, y, encoders
 
 # Expected feature order during training
-train_features_order = [
-    'Title', 'Portfolio', 'Location', 'Team Name', 'Process Name', 'Process Group',
-    'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event',
-    'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'nino_monthly_frequency',
-    'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries', 'year_month'
-]
+train_features_order = ['Title', 'Portfolio', 'Location', 'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event', 'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'year_month', 'nino_monthly_frequency', 'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries']
 
 if uploaded_file is not None:
     # Read the uploaded file
@@ -332,13 +327,37 @@ if uploaded_file is not None:
                     df_merged['will_file_complaint_in_future'] = 0
 
                 columns_to_drop = [
-                    'Case ID', 'Unique Identifier (NINO Encrypted)', 'ClientName', 'OneCode',
-                    'Current Activity User', 'Report_Date', 'Start Date', 'Create Date', 'Mercer Consented',
-                    'Pend Case', 'Source', 'Pend Case', 'Operational Location', 'Case Indicator',
-                    'Flag_Scheme', 'Team Name', 'Process Name', 'Critical', 'Current Outsourcing Team',
-                    'Event Type', 'Completes', 'Consented/Non consented', 'Scheme'
-                ]
+    'Case ID',
+    'Unique Identifier (NINO Encrypted)',
+    'ClientName',
+    'OneCode',
+    'Current Activity User',
+    'Report_Date',
+    'Start Date',
+    'Create Date',
+    'Mercer Consented',
+    'Pend Case',
+    #'Scan+2',
+    'Source',
+    'Pend Case',
+    'Operational Location',
+    'Case Indicator',
+    'Flag_Scheme',
+    #'Portfolio',
+    'Team Name',
+    #'Location',
+    'Process Name',
+    'Process Group',
+    'Critical',
+    #'Onshore/Offshore',
+    'Current Outsourcing Team',
+    'Event Type',
+    #'Site',
+    'Completes',
+    'Consented/Non consented',
+    'Scheme'
 
+]
                 X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
 
                 for f in train_features_order:
@@ -349,11 +368,15 @@ if uploaded_file is not None:
 
                 model = models['model_jan_feb_mar_apr']
 
-                df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+                df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
 
-
-    
+                print(model.get_booster().feature_names)
+                print(f"Number of features trained on: {len(model.get_booster().feature_names)}")
+                print("Are columns unique?", len(X_user.columns) == len(set(X_user.columns)))
+                X_user = X_user.apply(pd.to_numeric, errors='coerce').fillna(0)
+                model_features = model.get_booster().feature_names
+                X_user = X_user[model_features]
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)

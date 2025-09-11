@@ -288,12 +288,7 @@ def preprocess_data_and_drop(df, drop_columns, target_column=None):
     return X, y, encoders
 
 # Expected feature order during training
-train_features_order = [
-    'Title', 'Portfolio', 'Location', 'Team Name', 'Process Name',
-    'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event',
-    'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'year_month','nino_monthly_frequency',
-    'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries'
-]
+train_features_order = ['Title', 'Portfolio', 'Location', 'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event', 'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'year_month', 'nino_monthly_frequency', 'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries']
 
 if uploaded_file is not None:
     # Read the uploaded file
@@ -331,7 +326,7 @@ if uploaded_file is not None:
                 if 'will_file_complaint_in_future' not in df_merged.columns:
                     df_merged['will_file_complaint_in_future'] = 0
 
-                columns_to_drop = columns_to_drop = [
+                columns_to_drop = [
     'Case ID',
     'Unique Identifier (NINO Encrypted)',
     'ClientName',
@@ -349,7 +344,7 @@ if uploaded_file is not None:
     'Case Indicator',
     'Flag_Scheme',
     #'Portfolio',
-    'Team Name'
+    'Team Name',
     #'Location',
     'Process Name',
     'Process Group',
@@ -357,7 +352,7 @@ if uploaded_file is not None:
     #'Onshore/Offshore',
     'Current Outsourcing Team',
     'Event Type',
-    #'Site',#
+    #'Site',
     'Completes',
     'Consented/Non consented',
     'Scheme'
