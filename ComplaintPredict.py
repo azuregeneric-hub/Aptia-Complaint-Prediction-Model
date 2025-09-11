@@ -290,6 +290,8 @@ def preprocess_data_and_drop(df, drop_columns, target_column=None):
 # Expected feature order during training
 train_features_order = ['Title', 'Portfolio', 'Location', 'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event', 'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'year_month', 'nino_monthly_frequency', 'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries']
 
+
+
 if uploaded_file is not None:
     # Read the uploaded file
     try:
@@ -326,7 +328,7 @@ if uploaded_file is not None:
                 if 'will_file_complaint_in_future' not in df_merged.columns:
                     df_merged['will_file_complaint_in_future'] = 0
 
-                columns_to_drop = [
+                columns_to_drop =  [
     'Case ID',
     'Unique Identifier (NINO Encrypted)',
     'ClientName',
