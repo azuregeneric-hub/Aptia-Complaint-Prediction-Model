@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 from PIL import Image
 import os
 
-# Set page configuration
+# --- Custom CSS for the main UI (unchanged) ---
 st.set_page_config(
     page_title="Complaint Prediction Tool",
     page_icon="⚠️",
@@ -13,7 +13,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for a more professional and beautiful UI
 st.markdown("""
     <style>
     /* Import a professional font from Google Fonts */
@@ -28,11 +27,11 @@ st.markdown("""
     /* Header with a subtle gradient */
     .header {
         background: linear-gradient(90deg, #153647 0%, #1a4d64 100%);
-        padding: 10px 20px;
+        padding: 5px 20px;
         border-radius: 0 0 15px 15px;
         margin-bottom: 20px;
         color: white;
-        box-shadow: 0 6px 15px rgba(21, 54, 71, 0.4);
+        box-shadow: 0 0px 15px rgba(21, 54, 71, 0.4);
         text-align: center;
         display: flex;
         align-items: center;
@@ -48,14 +47,15 @@ st.markdown("""
         letter-spacing: 1px;
     }
     
-    /* Subtitle styling */
+    /* Subtitle styling with subtle shadow */
     .subtitle-text {
         text-align: center;
         color: #16d49b;
-        font-size: 20px;
+        font-size: 22px;
         margin-top: 15px;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
         font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
     
     /* Section headers with a more refined look */
@@ -66,20 +66,20 @@ st.markdown("""
         margin-top: 2rem;
         font-weight: 600;
     }
-    
-    /* Removed card styling */
-    /* .card-container {}
-    .card {} */
 
-    /* File uploader styling */
+    /* File uploader styling with more pronounced shadow */
     .stFileUploader > div > div {
         background-color: rgba(255, 255, 255, 0.95);
         padding: 25px;
         border-radius: 15px;
         border: 2px dashed #16d49b;
-        box-shadow: inset 0 0 10px rgba(22, 212, 155, 0.1);
+        box-shadow: 0 4px 15px rgba(22, 212, 155, 0.2);
+        transition: box-shadow 0.3s ease-in-out;
     }
-    
+    .stFileUploader > div > div:hover {
+        box-shadow: 0 6px 20px rgba(22, 212, 155, 0.3);
+    }
+
     /* Button styling - Aptia teal */
     .stButton > button {
         background-color: #16d49b;
@@ -111,7 +111,7 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(21, 54, 71, 0.4);
     }
     
-    /* Metric boxes - Now without a background color */
+    /* Metric boxes - with subtle shadow */
     .metric-card {
         background: none;
         border: 2px solid #153647;
@@ -119,7 +119,7 @@ st.markdown("""
         padding: 10px;
         border-radius: 12px;
         text-align: center;
-        box-shadow: 0 2px 8px rgba(21, 54, 71, 0.1);
+        box-shadow: 0 4px 10px rgba(21, 54, 71, 0.15);
     }
     
     .metric-title {
@@ -134,15 +134,40 @@ st.markdown("""
         font-weight: 700;
     }
 
-    /* Custom CSS for the green line and space management */
+    /* Custom CSS for the green line */
     .green-line {
         border-top: 2px solid #16d49b;
         margin-top: 15px;
-        margin-bottom: 15px; /* Restored bottom margin for spacing */
+        margin-bottom: 15px;
+    }
+    
+    /* NEW: Professional styling for Streamlit DataFrames */
+    .stDataFrame table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
     }
 
-    /* Removed custom spacing classes to let Streamlit handle it */
-    /* .st-emotion-cache-16txte7, .st-emotion-cache-1pxx0n6, .st-emotion-cache-j9l6j4 {} */
+    /* This CSS now applies to the pandas.Styler object */
+    .stDataFrame th {
+        background-color: #153647 !important;
+        color: white !important;
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #e0e0e0;
+        font-weight: 500;
+    }
+    
+    .stDataFrame td {
+        padding: 10px;
+        border: 1px solid #e0e0e0;
+    }
+    .stDataFrame table tr:nth-child(even) {
+        background-color: #f7f9fc;
+    }
+    .stDataFrame table tr:hover {
+        background-color: #e6f0ff;
+    }
 
     /* Sidebar styling */
     .sidebar .sidebar-content {
@@ -176,7 +201,6 @@ except FileNotFoundError:
 
 # Sidebar with simplified information
 with st.sidebar:
-    # Add Aptia logo with proper alignment
     if aptia_logo:
         st.image(aptia_logo, use_container_width=True)
     else:
@@ -215,8 +239,6 @@ uploaded_file = st.file_uploader(
     type=['xlsx', 'xls', 'csv'],
     label_visibility="collapsed"
 )
-
-# ... [rest of the code remains the same] ...
 
 # Load pre-trained models
 @st.cache_resource
@@ -310,11 +332,9 @@ if uploaded_file is not None:
     if user_df is not None:
         st.markdown('<div class="green-line"></div>', unsafe_allow_html=True)
     
-        # Removed the card containers around this section
         st.markdown("### 📋 Data Preview")
         st.dataframe(user_df.head(), use_container_width=True)
-        # Removed the closing card div tags
-
+    
         with st.spinner("Loading prediction models and historical data..."):
             models = load_models()
             lookup_nino, lookup_procgroup = load_lookup_tables()
@@ -335,12 +355,37 @@ if uploaded_file is not None:
                     df_merged['will_file_complaint_in_future'] = 0
 
                 columns_to_drop = [
-                    'Case ID', 'Unique Identifier (NINO Encrypted)', 'ClientName', 'OneCode',
-                    'Current Activity User', 'Report_Date', 'Start Date', 'Create Date', 'Mercer Consented',
-                    'Pend Case', 'Source', 'Pend Case', 'Operational Location', 'Case Indicator',
-                    'Flag_Scheme', 'Team Name', 'Process Name', 'Critical', 'Current Outsourcing Team',
-                    'Event Type', 'Completes', 'Consented/Non consented', 'Scheme'
-                ]
+    'Case ID',
+    'Unique Identifier (NINO Encrypted)',
+    'ClientName',
+    'OneCode',
+    'Current Activity User',
+    'Report_Date',
+    'Start Date',
+    'Create Date',
+    'Mercer Consented',
+    'Pend Case',
+    #'Scan+2',
+    'Source',
+    'Pend Case',
+    'Operational Location',
+    'Case Indicator',
+    'Flag_Scheme',
+    #'Portfolio',
+    'Team Name'
+    #'Location',
+    'Process Name',
+    'Process Group',
+    'Critical',
+    #'Onshore/Offshore',
+    'Current Outsourcing Team',
+    'Event Type',
+    #'Site',
+    'Completes',
+    'Consented/Non consented',
+    'Scheme'
+
+]
 
                 X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
 
@@ -352,10 +397,10 @@ if uploaded_file is not None:
 
                 model = models['model_jan_feb_mar_apr']
 
-                df_merged['Predicted_Complaint'] = model.predict(X_user)
+                # Use a custom threshold of 0.8 to classify high-risk complaints
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
-    
-            # Removed the card containers around this section
+                df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
+
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)
@@ -388,22 +433,25 @@ if uploaded_file is not None:
             st.markdown("### 🎯 High-Risk Cases Predicted")
             
             if complaint_cases > 0:
-                    high_risk_cases = df_merged[df_merged['Predicted_Complaint'] == 1].sort_values('Complaint_Probability', ascending=False)
-                    
-                    display_columns = ['Case ID', 'Unique Identifier (NINO Encrypted)', 'Title', 
-                                       'Process Group', 'Complaint_Probability']
-                    available_columns = [col for col in display_columns if col in high_risk_cases.columns]
-                    
-                    st.dataframe(high_risk_cases[available_columns], use_container_width=True)
-                    
-                    csv_data = high_risk_cases.to_csv(index=False)
-                    st.download_button(
-                        "📥 Download Prediction Results", 
-                        csv_data, 
-                        file_name='predicted_complaints.csv', 
-                        mime='text/csv'
-                    )
-            else:
-                    st.info("No cases were predicted to turn into complaints. Great job!")
+                high_risk_cases = df_merged[df_merged['Predicted_Complaint'] == 1].sort_values('Complaint_Probability', ascending=False)
                 
-            st.markdown('</div></div>', unsafe_allow_html=True)
+                display_columns = ['Case ID', 'Unique Identifier (NINO Encrypted)', 'Title', 
+                                   'Process Group', 'Complaint_Probability']
+                available_columns = [col for col in display_columns if col in high_risk_cases.columns]
+                
+                # Apply styling to the DataFrame before displaying it
+                styled_df = high_risk_cases[available_columns].style.set_table_styles([
+                    {'selector': 'th', 'props': [('background-color', '#153647'), ('color', 'white')]}
+                ])
+                
+                st.dataframe(styled_df, use_container_width=True)
+                
+                csv_data = high_risk_cases.to_csv(index=False)
+                st.download_button(
+                    "📥 Download Prediction Results", 
+                    csv_data, 
+                    file_name='predicted_complaints.csv', 
+                    mime='text/csv'
+                )
+            else:
+                st.markdown(f"<p style='text-align:center; color:#153647; font-weight:bold;'>No cases predicted to turn into complaints. Great job!</p>", unsafe_allow_html=True)

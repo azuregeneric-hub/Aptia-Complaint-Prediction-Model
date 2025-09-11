@@ -28,7 +28,8 @@ st.markdown("""
     /* Header with a subtle gradient */
     .header {
         background: linear-gradient(90deg, #153647 0%, #1a4d64 100%);
-        padding: 10px 20px;
+        /* Changed padding to move the header up */
+        padding: 5px 20px;
         border-radius: 0 0 15px 15px;
         margin-bottom: 20px;
         color: white;
@@ -66,10 +67,6 @@ st.markdown("""
         margin-top: 2rem;
         font-weight: 600;
     }
-    
-    /* Removed card styling */
-    /* .card-container {}
-    .card {} */
 
     /* File uploader styling */
     .stFileUploader > div > div {
@@ -134,15 +131,18 @@ st.markdown("""
         font-weight: 700;
     }
 
-    /* Custom CSS for the green line and space management */
+    /* Custom CSS for the green line */
     .green-line {
         border-top: 2px solid #16d49b;
         margin-top: 15px;
-        margin-bottom: 15px; /* Restored bottom margin for spacing */
+        margin-bottom: 15px;
     }
-
-    /* Removed custom spacing classes to let Streamlit handle it */
-    /* .st-emotion-cache-16txte7, .st-emotion-cache-1pxx0n6, .st-emotion-cache-j9l6j4 {} */
+    
+    /* Style for DataFrame headers */
+    .stDataFrame table th {
+        background-color: #153647;
+        color: white;
+    }
 
     /* Sidebar styling */
     .sidebar .sidebar-content {
@@ -176,7 +176,6 @@ except FileNotFoundError:
 
 # Sidebar with simplified information
 with st.sidebar:
-    # Add Aptia logo with proper alignment
     if aptia_logo:
         st.image(aptia_logo, use_container_width=True)
     else:
@@ -310,11 +309,9 @@ if uploaded_file is not None:
     if user_df is not None:
         st.markdown('<div class="green-line"></div>', unsafe_allow_html=True)
     
-        # Removed the card containers around this section
         st.markdown("### 📋 Data Preview")
         st.dataframe(user_df.head(), use_container_width=True)
-        # Removed the closing card div tags
-
+    
         with st.spinner("Loading prediction models and historical data..."):
             models = load_models()
             lookup_nino, lookup_procgroup = load_lookup_tables()
@@ -355,7 +352,6 @@ if uploaded_file is not None:
                 df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
     
-            # Removed the card containers around this section
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)
@@ -388,22 +384,20 @@ if uploaded_file is not None:
             st.markdown("### 🎯 High-Risk Cases Predicted")
             
             if complaint_cases > 0:
-                    high_risk_cases = df_merged[df_merged['Predicted_Complaint'] == 1].sort_values('Complaint_Probability', ascending=False)
-                    
-                    display_columns = ['Case ID', 'Unique Identifier (NINO Encrypted)', 'Title', 
-                                       'Process Group', 'Complaint_Probability']
-                    available_columns = [col for col in display_columns if col in high_risk_cases.columns]
-                    
-                    st.dataframe(high_risk_cases[available_columns], use_container_width=True)
-                    
-                    csv_data = high_risk_cases.to_csv(index=False)
-                    st.download_button(
-                        "📥 Download Prediction Results", 
-                        csv_data, 
-                        file_name='predicted_complaints.csv', 
-                        mime='text/csv'
-                    )
-            else:
-                    st.info("No cases were predicted to turn into complaints. Great job!")
+                high_risk_cases = df_merged[df_merged['Predicted_Complaint'] == 1].sort_values('Complaint_Probability', ascending=False)
                 
-            st.markdown('</div></div>', unsafe_allow_html=True)
+                display_columns = ['Case ID', 'Unique Identifier (NINO Encrypted)', 'Title', 
+                                   'Process Group', 'Complaint_Probability']
+                available_columns = [col for col in display_columns if col in high_risk_cases.columns]
+                
+                st.dataframe(high_risk_cases[available_columns], use_container_width=True)
+                
+                csv_data = high_risk_cases.to_csv(index=False)
+                st.download_button(
+                    "📥 Download Prediction Results", 
+                    csv_data, 
+                    file_name='predicted_complaints.csv', 
+                    mime='text/csv'
+                )
+            else:
+                st.markdown(f"<p style='text-align:center; color:#153647; font-weight:bold;'>No cases predicted to turn into complaints. Great job!</p>", unsafe_allow_html=True)
