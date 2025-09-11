@@ -352,7 +352,7 @@ if uploaded_file is not None:
     'Team Name'
     #'Location',
     'Process Name',
-    #'Process Group',
+    'Process Group',
     'Critical',
     #'Onshore/Offshore',
     'Current Outsourcing Team',
@@ -382,6 +382,8 @@ if uploaded_file is not None:
                 print(f"Number of features trained on: {len(model.get_booster().feature_names)}")
                 print("Are columns unique?", len(X_user.columns) == len(set(X_user.columns)))
                 X_user = X_user.apply(pd.to_numeric, errors='coerce').fillna(0)
+                model_features = model.get_booster().feature_names
+                X_user = X_user[model_features]
             st.markdown("### 📊 Prediction Summary")
             
             total_cases = len(df_merged)
