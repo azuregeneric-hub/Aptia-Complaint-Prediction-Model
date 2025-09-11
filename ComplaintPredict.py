@@ -402,7 +402,34 @@ if uploaded_file is not None:
             model = models['model_jan_feb_mar_apr']
 
 
-# Prediction
+# Prediction# Debug print to compare feature names
+            print("Model expects features:", model.get_booster().feature_names)
+            print("X_user columns prior predict:", list(X_user.columns))
+
+            # Clean whitespace from both lists
+            model_features = [f.strip() for f in model.get_booster().feature_names]
+            X_user_cols = [c.strip() for c in X_user.columns]
+            # Reassign columns with stripped names
+            X_user.columns = X_user_cols
+
+
+
+
+# Optional: force update model feature names if mismatch persists and data aligns
+            model.get_booster().feature_names = X_user_cols
+            print("Model features cleaned:", model_features)
+            print("X_user columns cleaned:", X_user_cols)
+            print("Exact match:", model_features == X_user_cols)
+            df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+
+
+
+
+
+# Then proceed to predict
+
+
+            
             df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
             df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
 
