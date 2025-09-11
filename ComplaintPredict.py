@@ -255,6 +255,7 @@ def load_lookup_tables():
     try:
         lookup_nino = pd.read_csv("nino_lookup_features.csv")
         lookup_procgroup = pd.read_csv("nino_procgroup_lookup_features.csv")
+        #lookup_nino_monthly=pd.read_csv("nino_monthly_lookup_features.csv")
 
         # Clean keys for consistency
         lookup_nino['Unique Identifier (NINO Encrypted)'] = (
@@ -266,10 +267,13 @@ def load_lookup_tables():
         lookup_procgroup['Process Group'] = (
             lookup_procgroup['Process Group'].astype(str).str.strip()
         )
-        return lookup_nino, lookup_procgroup
+        # lookup_nino_monthly['Unique Identifier (NINO Encrypted)'] = (
+        #     lookup_nino_monthly['Unique Identifier (NINO Encrypted)'].astype(str).str.strip().str.upper()
+        # )
+        return lookup_nino, lookup_procgroup  # , lookup_nino_monthly
     except FileNotFoundError:
-        st.error("Historical data files not found. Please ensure `nino_lookup_features.csv` and `nino_procgroup_lookup_features.csv` are in the same directory.")
-        return None, None
+        st.error("Historical data files not found. Please ensure `nino_lookup_features.csv` and `nino_procgroup_lookup_features.csv` and `nino_monthly_lookup_features.csv` are in the same directory.")
+        return None, None 
 
 # Cleaning NINO
 def clean_nino_column(df):
@@ -387,19 +391,20 @@ if uploaded_file is not None:
 
 ]
 
-                X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
+            # Prepare features as you do
+            X_user, _, _ = preprocess_data_and_drop(df_merged, columns_to_drop, target_column='will_file_complaint_in_future')
 
-                for f in train_features_order:
-                    if f not in X_user.columns:
-                        X_user[f] = 0
+            # Ensure all features present and ordered correctly
+            for f in train_features_order:
+                  if f not in X_user.columns:
+                     X_user[f] = 0
+            X_user = X_user[train_features_order]
+            model = models['model_jan_feb_mar_apr']
 
-                X_user = X_user[train_features_order]
 
-                model = models['model_jan_feb_mar_apr']
-
-                # Use a custom threshold of 0.8 to classify high-risk complaints
-                df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
-                df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
+# Prediction
+            df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+            df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
 
             st.markdown("### 📊 Prediction Summary")
             
