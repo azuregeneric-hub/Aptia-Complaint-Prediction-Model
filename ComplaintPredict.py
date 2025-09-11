@@ -352,7 +352,7 @@ if uploaded_file is not None:
     'Team Name'
     #'Location',
     'Process Name',
-    'Process Group',
+    #'Process Group',
     'Critical',
     #'Onshore/Offshore',
     'Current Outsourcing Team',
