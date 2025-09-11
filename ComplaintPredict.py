@@ -291,8 +291,8 @@ def preprocess_data_and_drop(df, drop_columns, target_column=None):
 train_features_order = [
     'Title', 'Portfolio', 'Location', 'Team Name', 'Process Name', 'Process Group',
     'Onshore/Offshore', 'Days to Target', 'Scan+2', 'Site', 'Manual/RPA', 'Forthcoming Event',
-    'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'nino_monthly_frequency',
-    'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries', 'year_month'
+    'Within SLA', 'Vulnerable Customer', 'No of Days', 'Mercer Days', 'year_month','nino_monthly_frequency',
+    'nino_cum_complaints', 'nino_total_enquiries', 'nino_procgroup_enquiries'
 ]
 
 if uploaded_file is not None:
