@@ -373,11 +373,9 @@ if uploaded_file is not None:
 
                 model = models['model_jan_feb_mar_apr']
 
-                #df_merged['Predicted_Complaint'] = model.predict(X_user)
-                #df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
-
-                df_merged['Predicted_Complaint'] = model.predict(X_user)
                 df_merged['Complaint_Probability'] = model.predict_proba(X_user)[:, 1]
+                df_merged['Predicted_Complaint'] = (df_merged['Complaint_Probability'] >= 0.8).astype(int)
+
                 print(model.get_booster().feature_names)
                 print(f"Number of features trained on: {len(model.get_booster().feature_names)}")
                 print("Are columns unique?", len(X_user.columns) == len(set(X_user.columns)))
