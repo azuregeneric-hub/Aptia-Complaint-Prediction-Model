@@ -119,10 +119,15 @@ uploaded_file = st.file_uploader("Choose a file", type=['csv', 'xlsx'], label_vi
 
 @st.cache_data
 def load_models():
-    model = pickle.load(open(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/model.pkl', 'rb'))
-    le_dict = pickle.load(open(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/le_dict.pkl', 'rb'))
-    lookup_cum = pd.read_csv(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/nino_lookup_cumulative.csv')
-    lookup_monthly = pd.read_csv(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/nino_lookup_monthly_freq.csv')
+    # model = pickle.load(open(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/model.pkl', 'rb'))
+    # le_dict = pickle.load(open(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/le_dict.pkl', 'rb'))
+    # lookup_cum = pd.read_csv(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/nino_lookup_cumulative.csv')
+    # lookup_monthly = pd.read_csv(r'C:/Users/Sumit/Downloads/AptiaComplaintPredictModel2 -w0lag/Pythoncodes/nino_lookup_monthly_freq.csv')
+    model = pickle.load(open('model.pkl', 'rb'))
+    le_dict = pickle.load(open('le_dict.pkl', 'rb'))
+    lookup_cum = pd.read_csv('nino_lookup_cumulative.csv')
+    lookup_monthly = pd.read_csv('nino_lookup_monthly_freq.csv')
+
     return model, le_dict, lookup_cum, lookup_monthly
 
 model, le_dict, lookup_cum, lookup_monthly = load_models()
