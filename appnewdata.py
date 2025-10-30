@@ -119,10 +119,10 @@ uploaded_file = st.file_uploader("Choose a file", type=['csv', 'xlsx'], label_vi
 
 @st.cache_data
 def load_models():
-    model = pickle.load(open('Newdata_model.pkl', 'rb'))
-    le_dict = pickle.load(open('Newdata_le_dict.pkl', 'rb'))
-    lookup_cum = pd.read_csv('Newdata_nino_lookup_cumulative.csv')
-    lookup_monthly = pd.read_csv('Newdata_nino_lookup_monthly_freq.csv')
+    model = pickle.load(open('model.pkl', 'rb'))
+    le_dict = pickle.load(open('le_dict.pkl', 'rb'))
+    lookup_cum = pd.read_pickle('Newdata_nino_lookup_cumulative.pkl')
+    lookup_monthly = pd.read_pickle('Newdata_nino_lookup_monthly_freq.pkl')
     return model, le_dict, lookup_cum, lookup_monthly
 
 model, le_dict, lookup_cum, lookup_monthly = load_models()
@@ -132,17 +132,25 @@ if uploaded_file is not None:
         user_df = pd.read_csv(uploaded_file)
     else:
         user_df = pd.read_excel(uploaded_file)
-    # Exclude existing complaints from uploaded data
-    if 'Process Category' in user_df.columns:
-        user_df = user_df[~user_df['Process Category'].str.strip().str.lower().eq('complaint')]
-        user_df = user_df.reset_index(drop=True)
-    else:
-        st.warning("'Process Category' column not found. Predictions may be inaccurate.")
 
+    total_inquiries_raw = len(user_df)    
+    
+    original_user_df = user_df.copy()
+
+    #Exclude existing complaints from uploaded data
+    # if 'Process Category' in user_df.columns:
+    #     user_df = user_df[~user_df['Process Category'].str.strip().str.lower().eq('complaint')]
+    #     user_df = user_df.reset_index(drop=True)
+    # else:
+    #     st.warning("'Process Category' column not found. Predictions may be inaccurate.")
+
+    
+    
     st.markdown("### 📋 Uploaded Data Preview")
     st.dataframe(user_df.head(), use_container_width=True)
 
-    uid_col = "NI Number"
+    uid_col = "Unique Identifier (NINO Encrypted)"
+    
 
     # Standardize column names for consistent merges (if necessary)
     lookup_cum.rename(columns=lambda x: x.strip(), inplace=True)
@@ -215,35 +223,61 @@ if uploaded_file is not None:
     user_df['Event_Location'] = user_df['Event Type'].astype(str) + '_' + user_df['Location'].astype(str)
 
     # Drop columns as per trained model pipeline
-    columns_to_drop = [
-        'AVC', 'Parent Case', 'Case Id', 'Location', 'Team', 'Title', 'Initials', 'Process Name', 'Processing Team',
-        'Event Date', 'Disclosure Date', 'Process SLA Date', 'Cashflow', 'Cash Payment', 'Current Activity User',
-        'Failed Activity SLA', 'Current Activity Reason', 'Date Due To Unpend', 'Action Post Pend',
-        'Pend SLA Clock On', 'Pend Case', 'Overseas Arrangement', 'Member Initiated Event',
-        'Disclosure Deadline missed', 'Prematurely Closed', 'Mbr Class', 'Mbr Location', 'Contact Method',
-        'Case Indicator', 'Optional/Payrun Date', 'Payroll Tax Month', 'Last Action By',
-        'Date Disclosure Letter Issued', 'Vulnerable Customer', 'Benefit Type', 'Case Data', 'Last UnPend Date',
-        'Current Activity Start Date', 'Current Activity SLA', 'Process Target Date', 'Closed Date',
-        'GOC', 'Reference', 'Current Activity', 'Process Category', 'Assigned To'
+    columns_to_drop =  [
+    'Assigned To',
+    'Cashflow',
+    'Cash Payment',
+    'Current Activity Reason',
+    'Action Post Pend',
+    'Pend SLA Clock On',
+    'Parent Case',
+    'Last Action By',
+    'Case ID',
+    'GOC',
+    'Location',
+    'Process Category',
+    'Pend Case',
+    'Closed Date',
+    'Event Date',
+    'Disclosure Date',
+    'Process SLA Date',
+    'Current Activity Start Date',
+    'Date Due To Unpend',
+    'Process Target Date',
+    'Optional/Payrun Date',
+    'Payroll Tax Month',
+    'Date Disclosure Letter Issued',
+    'Last UnPend Date',
+    'Current Activity SLA',
+    'Failed Activity SLA',
+    'Case Indicator',
+    'YearMonth',
+    'Flag_Scheme',
+    'Title',
+    'Vulnerable Customer',
+    'Event Type',
+    'Process Name'
+    
     ]
     user_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
     # Select model features (match your training features exactly)
-    model_features = [
-        'Region', 'Scheme', 'NI Number', 'Name', 'Process Type', 'Start Date',
-       'Failed Process Target', 'Fee Count', 'Event Type',
-       'Regulated Death Claim', 'Mercer Days', 'Days To Target',
-       'Pend Days (Clock off)', 'Past_Case_Count',
-       'Vulnerable_Ratio', 'Gender', 'Start_DayOfWeek', 'Start_Month',
-       'Start_Year', 'Past_Complaints_Cum', 'Complaint_Ratio',
-       'Event_Location', 'Complaint_30d_Rolling', 'YearMonth',
-       'Monthly_Query_Count_Past'
-    ]
+    model_features = ['Region', 'Team', 'Processing Team', 'Case Id', 'Scheme',
+       'Unique Identifier (NINO Encrypted)', 'Process Type', 'Start Date',
+       'Failed Process Target', 'Fee Count', 'Current Activity',
+       'Current Activity User', 'AVC', 'Regulated Death Claim', 'Mercer Days',
+       'Days To Target', 'Overseas Arrangement', 'Pend Days (Clock off)',
+       'Member Initiated Event', 'Disclosure Deadline missed', 'Mbr Class',
+       'Mbr Location', 'Contact Method', 'Benefit Type', 'Case Data',
+       'is_complaint', 'Past_Case_Count', 'Vulnerable_Ratio', 'Gender',
+       'Start_DayOfWeek', 'Start_Month', 'Start_Year', 'Past_Complaints_Cum',
+       'Complaint_Ratio', 'Event_Location', 'Complaint_30d_Rolling',
+       'Monthly_Query_Count_Past']
 
     X_user = user_df[model_features].copy()
 
     # Crucial fix: drop columns not handled by model (ID and datetime)
-    X_user = X_user.drop(columns=['NI Number', 'Start Date'], errors='ignore')
+    X_user = X_user.drop(columns=['is_complaint','Unique Identifier (NINO Encrypted)', 'Start Date'], errors='ignore')
 
     # Label encoding
     for col, le in le_dict.items():
@@ -259,16 +293,21 @@ if uploaded_file is not None:
 
     # Predict with your model
     preds_proba = model.predict_proba(X_user)[:, 1]
-    optimal_threshold = 0.92
+    optimal_threshold = 0.88
+
     preds_label = (preds_proba > optimal_threshold).astype(int)
 
     user_df['Complaint_Probability'] = preds_proba
     user_df['Prediction'] = preds_label
 
     high_prob_df = user_df[user_df['Complaint_Probability'] >= optimal_threshold]
-
+    high_prob_df = high_prob_df[
+    high_prob_df['Unique Identifier (NINO Encrypted)'].notna() & 
+    (high_prob_df['Unique Identifier (NINO Encrypted)'].astype(str).str.strip() != '')
+     ].copy()
+    
     # KPI metrics
-    total_cases = len(user_df)
+    total_cases = total_inquiries_raw
     potential_complaints = len(high_prob_df)
     complaint_rate = (potential_complaints / total_cases * 100) if total_cases > 0 else 0
 
@@ -282,7 +321,11 @@ if uploaded_file is not None:
         st.markdown(f'<div class="metric-card"><div class="metric-title">Complaint Rate</div><div class="metric-value">{complaint_rate:.1f}%</div></div>', unsafe_allow_html=True)
 
     st.markdown("### Complaints Data")
-    st.dataframe(high_prob_df[[uid_col,'Scheme','Process Type','Complaint_Probability']], use_container_width=True)
+    st.dataframe(high_prob_df[[uid_col,'Scheme','Process Type','Case Id']], use_container_width=True)
 
-    csv = high_prob_df.to_csv(index=False).encode()
+    # Filter original_user_df to keep only rows in high_prob_df by 'Case Id'
+    filtered_original_df = original_user_df[original_user_df['Case Id'].isin(high_prob_df['Case Id'])].copy()
+
+
+    csv = filtered_original_df.to_csv(index=False).encode()
     st.download_button(label="Download Predictions CSV", data=csv, file_name='complaint_predictions.csv', mime='text/csv')
